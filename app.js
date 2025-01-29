@@ -17,6 +17,8 @@ app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
 
+
+
 // Main API endpoint
 app.get('/api', (req, res) => {
     try {
