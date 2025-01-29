@@ -5,8 +5,9 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "vercel-build": "echo hello",
     "test": "echo \"Error: no test specified\" && exit 1"
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -14,5 +15,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@vercel/node": "^4.0.0"
   }
 }
