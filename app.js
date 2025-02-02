@@ -1,45 +1,36 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 app.use(cors());
 
-// Cache setup
+// In-memory cache
 const cache = new Map();
-const FACTS_CACHE_FILE = path.join(__dirname, 'facts_cache.json');
-let factsCache = {};
-try {
-    factsCache = JSON.parse(fs.readFileSync(FACTS_CACHE_FILE, 'utf8'));
-} catch (error) {
-    factsCache = {};
-}
 
 // Helper functions
 function isPrime(n) {
     if (n <= 1) return false;
-    if (n === 2) return true; // 2 is the only even prime number
-    if (n % 2 === 0) return false; // Exclude other even numbers
+    if (n === 2) return true;
+    if (n % 2 === 0) return false;
     const sqrt = Math.sqrt(n);
-    for (let i = 3; i <= sqrt; i += 2) { // Check only odd numbers
+    for (let i = 3; i <= sqrt; i += 2) {
         if (n % i === 0) return false;
     }
     return true;
 }
 
 function isPerfect(n) {
-    if (n < 2) return false; // No perfect numbers less than 2
-    let sum = 1; // Start with 1 as it's always a divisor
+    if (n < 2) return false;
+    let sum = 1;
     const sqrt = Math.sqrt(n);
     for (let i = 2; i <= sqrt; i++) {
         if (n % i === 0) {
             sum += i;
-            if (i !== n / i) sum += n / i; // Add the complementary divisor
+            if (i !== n / i) sum += n / i;
         }
     }
-    return sum === n && n !== 1; // Exclude 1 as it's not considered perfect
+    return sum === n && n !== 1;
 }
 
 function isArmstrong(n) {
@@ -54,14 +45,14 @@ function getDigitSum(n) {
 }
 
 async function getFunFact(n) {
-    if (factsCache[n]) return factsCache[n];
+    if (cache.has(`fun_fact_${n}`)) return cache.get(`fun_fact_${n}`);
     try {
-        const response = await axios.get(`http://numbersapi.com/${n}/math`);
+        const response = await axios.get(`http://numbersapi.com/${n}/math`, { timeout: 2000 });
         const fact = response.data.trim();
-        factsCache[n] = fact; // Cache the fact
-        fs.writeFileSync(FACTS_CACHE_FILE, JSON.stringify(factsCache, null, 2)); // Save to file
+        cache.set(`fun_fact_${n}`, fact);
         return fact;
     } catch (error) {
+        console.error(`Error fetching fun fact for ${n}:`, error.message);
         return 'Fun fact unavailable';
     }
 }
